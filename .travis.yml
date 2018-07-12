@@ -2,3 +2,5 @@ language: rust
 
 script:
   - cargo build --verbose --all
+  - git clone https://${GITHUB_USERNAME}:${GITHUB_TOKEN}@github.com/aerys/gpm-packages.git
+  
