@@ -15,10 +15,10 @@ if ! git lfs env &> /dev/null; then
     exit 1
 fi
 
-if [ -z "${TRAVIS_TAG}" ]; then
-    echo "error: TRAVIS_TAG is not set: publish.sh is meant to run on Travis CI and only on tags" >&2
-    exit 1
-fi
+# if [ -z "${TRAVIS_TAG}" ]; then
+#     echo "error: TRAVIS_TAG is not set: publish.sh is meant to run on Travis CI and only on tags" >&2
+#     exit 1
+# fi
 
 if [ -z "${GITHUB_USERNAME}" ] || [ -z "${GITHUB_TOKEN}" ]; then
     echo "error: GITHUB_USERNAME and GITHUB_TOKEN must be set" >&2
