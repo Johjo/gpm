@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Usage: ./build-release <PROJECT> ${TRAVIS_TAG}-${TRAVIS_OS_NAME}
+# Usage: ./build-release <PROJECT>
 #
 # The latest version of this script is available at
 # https://github.com/emk/rust-musl-builder/blob/master/examples/build-release
@@ -24,11 +24,10 @@ case `uname -s` in
         docker cp build-"$1":/home/rust/src/target/x86_64-unknown-linux-musl/release/"$1" "$1"
         docker rm build-"$1"
         docker rmi build-"$1"-image
-        zip "$1"-"$2".zip "$1"
+        strip "$1"
         ;;
     *)
         echo "Building standard release binaries"
         cargo build --release
-        zip -j "$1"-"$2".zip target/release/"$1"
         ;;
 esac
