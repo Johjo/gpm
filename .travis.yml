@@ -14,6 +14,6 @@ script:
 deploy:
   skip_cleanup: true
   on:
-    branch: feature/travis-ci
+    tags: true
   provider: script
   script: bash script/publish.sh
