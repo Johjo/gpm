@@ -10,9 +10,9 @@ services:
 
 script:
   - ./script/build-release.sh gpm
-  - strip gpm
   
 deploy:
+  skip_cleanup: true
   provider: script
   on:
     branch: feature/travis-ci
