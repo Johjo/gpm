@@ -1,6 +1,10 @@
 language: rust
 
+sudo: required
+
+services:
+  - docker
+
 script:
-  - cargo build --verbose --all
+  - docker run --rm -it -v "$(pwd)":/home/rust/src ekidd/rust-musl-builder cargo build --release --target x86_64-unknown-linux-musl
   - git clone https://${GITHUB_USERNAME}:${GITHUB_TOKEN}@github.com/aerys/gpm-packages.git
-  
