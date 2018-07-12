@@ -1,6 +1,7 @@
 #!/bin/bash
 
 echo ̀`pwd`
+ls -lha
 
 if ! [ -x "$(command -v git)" ]; then
     echo "error: git is not installed" >&2

@@ -10,7 +10,6 @@ services:
 
 script:
   - ./script/build-release.sh gpm
-  - ls -lha
   
 deploy:
   skip_cleanup: true
