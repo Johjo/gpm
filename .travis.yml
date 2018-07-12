@@ -15,7 +15,7 @@ script:
 deploy:
   provider: script
   on:
-    - branch: feature/travis-ci
+    branch: feature/travis-ci
   script:
     - VERSION=`grep -Po '(?<=version = ")[0-9\.]+' Cargo.toml`
     - git clone https://${GITHUB_USERNAME}:${GITHUB_TOKEN}@github.com/aerys/gpm-packages.git
