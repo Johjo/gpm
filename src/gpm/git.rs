@@ -218,6 +218,7 @@ pub fn find_repo_by_package_and_revision(
         pb.inc(1);
         pb.set_message(&remote);
 
+        debug!("move repository HEAD to refs/heads/master");
         let mut builder = git2::build::CheckoutBuilder::new();
         builder.force();
         repo.set_head("refs/heads/master")?;

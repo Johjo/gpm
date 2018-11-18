@@ -245,6 +245,62 @@ fn download_command(
     Ok(true)
 }
 
+fn unpublish_command(
+    remote : Option<String>,
+    package : &String,
+    revision : &String,
+) -> Result<bool, CommandError> {
+    info!("running the \"unpublish\" command for package {} at revision {}", package, revision);
+
+    println!(
+        "{} package {} at revision {}",
+        gpm::style::command(&String::from("Unpublishing")),
+        gpm::style::package_name(&package),
+        gpm::style::revision(&revision),
+    );
+
+    println!(
+        "{} Resolving package",
+        style("[1/3]").bold().dim(),
+    );
+
+    let (repo, refspec) = match gpm::git::find_or_init_repo(remote, package, revision)? {
+        Some(repo) => repo,
+        None => panic!("package/revision was not found in any repository"),
+    };
+    let remote = repo.find_remote("origin")?.url().unwrap().to_owned();
+
+    info!("revision {} found as refspec {} in repository {}", &revision, &refspec, remote);
+
+    let oid = repo.refname_to_id(&refspec).map_err(CommandError::Git)?;
+    let head = repo.refname_to_id("refs/heads/master").map_err(CommandError::Git)?;
+    let head = repo.find_commit(head).map_err(CommandError::Git)?;
+    let mut parent = head;
+    let mut commits : Vec<git2::AnnotatedCommit> = Vec::new();
+
+    while parent.id() != oid {
+        println!("parent {}", parent.id());
+        commits.push(repo.find_annotated_commit(parent.id()).map_err(CommandError::Git)?);
+        parent = parent.parent(0).map_err(CommandError::Git)?;
+    }
+
+    parent = parent.parent(0).map_err(CommandError::Git)?;
+
+    println!("branching from {}", parent.id());
+    let branch_name = format!("gpm-unpublish-{}-{}", package, revision);
+    repo.set_head("refs/heads/master").map_err(CommandError::Git)?;
+    repo.branch(&branch_name, &parent, true).map_err(CommandError::Git)?;
+    repo.set_head(&format!("refs/heads/{}", branch_name)).map_err(CommandError::Git)?;
+    for commit in commits {
+        println!("cherry pick {}", commit.id());
+        // ! FIXME: cherry-pick commit
+    }
+
+    // ! FIXME: merge branch_name
+
+    Ok(true)
+}
+
 fn install_command(
     remote : Option<String>,
     package : &String,
@@ -443,6 +499,10 @@ fn main() {
                 .required(false)
             )
         )
+        .subcommand(clap::SubCommand::with_name("unpublish")
+            .about("Unpublish a package")
+            .arg(Arg::with_name("package"))
+        )
         .subcommand(clap::SubCommand::with_name("update")
             .about("Update all package repositories")
         )
@@ -548,6 +608,32 @@ fn main() {
             },
             Err(e) => {
                 error!("could not download package \"{}\" at revision {}: {}", package, revision, e);
+                std::process::exit(1);
+            },
+        };
+    }
+
+    if let Some(matches) = matches.subcommand_matches("unpublish") {
+        let package = String::from(matches.value_of("package").unwrap());
+        let (repo, package, revision) = parse_package_ref(&package);
+
+        if repo.is_some() {
+            debug!("parsed package URI: repo = {}, name = {}, revision = {}", repo.to_owned().unwrap(), package, revision);
+        } else {
+            debug!("parsed package: name = {}, revision = {}", package, revision);
+        }
+
+        match unpublish_command(repo, &package, &revision) {
+            Ok(success) => {
+                if success {
+                    info!("successfully unpublished package {} at revision {}", package, revision);
+                } else {
+                    error!("revision {} of package {} has not been unpublished, check the logs for warnings/errors", revision, package);
+                    std::process::exit(1);
+                }
+            },
+            Err(e) => {
+                error!("could not unpublish revision {} of package \"{}\": {}", revision, package, e);
                 std::process::exit(1);
             },
         };
