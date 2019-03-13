@@ -173,12 +173,19 @@ pub fn get_ssh_passphrase(buf : &mut io::BufRead, passphrase_prompt : String) ->
         true => match env::var("GPM_SSH_PASS") {
             Ok(p) => Some(p),
             Err(_) => {
-
                 trace!("prompt for passphrase");
                 let pass_string = rpassword::prompt_password_stderr(passphrase_prompt.as_str())
                     .unwrap();
 
                 trace!("passphrase fetched from command line");
+
+                // https://github.com/conradkdotcom/rpassword/issues/32
+                #[cfg(windows)]
+                {
+                    let t = console::Term::stderr();
+
+                    t.write_line("").unwrap();
+                }
 
                 Some(pass_string)
             }
