@@ -1,0 +1,14 @@
+stages:
+  - build
+
+build:linux64:
+  stage: build
+  script:
+    - cargo build --release
+
+build:windows64:
+  stage: build
+  tags:
+    - windows
+  script:
+    - cargo build --release
