@@ -10,10 +10,3 @@ services:
 
 script:
   - ./script/build-release.sh
-  
-deploy:
-  skip_cleanup: true
-  on:
-    tags: true
-  provider: script
-  script: bash script/publish.sh
