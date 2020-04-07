@@ -1,5 +1,6 @@
 stages:
   - build
+  - changelog
   - source-release
   - publish
   - package-release
@@ -74,7 +75,7 @@ build:windows64:
     - cargo build --release
 
 changelog:
-  stage: source-release
+  stage: changelog
   image: registry.aerys.in/aerys/gitlab-flow-release:latest
   only:
     - tags
@@ -98,7 +99,7 @@ gitlab-source-release:
     - gitlab-flow-release --private-token "${RELEASE_PRIVATE_TOKEN}" release
 
 github-source-release:
-  <<: &github_release_template
+  <<: *github_release_template
   stage: source-release
   variables:
     RELEASE_AUTH_TOKEN: ${GITHUB_TOKEN}
@@ -134,7 +135,7 @@ publish:linux64:
     PACKAGE_CHANGELOG: ${CI_PROJECT_DIR}/CHANGELOG.md
 
 github-package-release:windows64:
-  <<: &github_release_template
+  <<: *github_release_template
   stage: package-release
   variables:
     RELEASE_AUTH_TOKEN: ${GITHUB_TOKEN}
@@ -144,7 +145,7 @@ github-package-release:windows64:
     RELEASE_NOTES: ${CI_PROJECT_DIR}/CHANGELOG.md
 
 github-package-release:linux64:
-  <<: &github_package_release_template
+  <<: *github_release_template
   stage: package-release
   variables:
     RELEASE_AUTH_TOKEN: ${GITHUB_TOKEN}
