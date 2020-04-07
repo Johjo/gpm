@@ -61,7 +61,7 @@ build:linux64:
     paths:
       - gpm
   script:
-    - ./script/build-release.sh gpm
+    - ./script/build-release.sh
 
 build:windows64:
   stage: build
