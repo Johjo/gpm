@@ -9,7 +9,7 @@ stages:
   stage: publish
   image:
     name: alpine/git:v2.24.1
-    entrypoint: sh
+    entrypoint: ["/bin/sh", "-c"]
   only:
     - tags
   script:
