@@ -4,6 +4,8 @@ use std::path;
 use url::{Url};
 use semver::{Version, VersionReq};
 use console::style;
+use termimad;
+use crossterm;
 
 #[derive(Debug, Clone)]
 pub struct PackageVersion {
@@ -217,6 +219,38 @@ impl Package {
 
     pub fn get_archive_filename(&self) -> String {
         format!("{}.tar.gz", self.name)
+    }
+
+    pub fn print_message(&self, oid: git2::Oid, repo: &git2::Repository) {
+        match repo.find_tag(oid) {
+            Ok(tag) => {
+                if let Some(tag_message) = tag.message() {
+                    debug!("tag message is set");
+                    
+                    let tag_message = if tag_message.starts_with("# ") {
+                        debug!("tag message is using the Markdown format");
+
+                        let mut skin = termimad::MadSkin::default();
+                        skin.headers[2].add_attr(crossterm::style::Attribute::Dim);
+                        skin.bullet = termimad::StyledChar::from_fg_char(crossterm::style::Color::White, '•');
+    
+                        let (width, _) = termimad::terminal_size();
+                        let markdown = skin.text(&tag_message, Some((width - 4) as usize))
+                            .to_string()
+                            .to_owned();
+
+                        markdown
+                    } else {
+                        String::from(tag_message)
+                    };
+
+                    println!("\n    {}\n", tag_message.trim().replace("\n", "\n    "));
+                }
+            },
+            Err(_) => {
+
+            }
+        };
     }
 }
 
