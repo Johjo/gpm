@@ -234,11 +234,10 @@ impl Package {
                     skin.bullet = termimad::StyledChar::from_fg_char(crossterm::style::Color::White, '•');
 
                     let (width, _) = termimad::terminal_size();
-                    let markdown = skin.text(&tag_message, Some((width - 4) as usize))
+                    
+                    skin.text(&tag_message, Some((width - 4) as usize))
                         .to_string()
-                        .to_owned();
-
-                    markdown
+                        .to_owned()
                 } else {
                     String::from(tag_message)
                 };
