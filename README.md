@@ -239,7 +239,7 @@ Your `hello-world/1.0` package is now installed and you can run it with `sh ~/he
 
 ## 7. Authentication
 
-`gpm` will behave a lot lit Git regarding authentication.
+`gpm` will behave a lot lit `git` regarding authentication.
 
 If the repository is "public", then no authentication should be required.
 
@@ -437,7 +437,7 @@ Example:
 GPM_LOG=info gpm update
 ```
 
-Logs can be *very* verbose. So it's best to keep only the `gpm` and Git LFS module logs.
+Logs can be *very* verbose. So it's best to keep only the `gpm` and `gitlfs` module logs.
 For example:
 
 ```bash
