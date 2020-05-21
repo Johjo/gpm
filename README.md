@@ -239,7 +239,7 @@ Your `hello-world/1.0` package is now installed and you can run it with `sh ~/he
 
 ## 7. Authentication
 
-`gpm` will behave a lot lit `git` regarding authentication.
+`gpm` will behave a lot like `git` regarding authentication.
 
 If the repository is "public", then no authentication should be required.
 
