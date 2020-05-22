@@ -497,7 +497,7 @@ gpm install ssh://github.com/my/awesome-packages.git#app/2.0.0 \
 ```bash
 # assuming the repository ssh://github.com/my/awesome-packages.git is in
 # ~/.gpm/sources.list and the cache has been updated using `gpm update`
-gpm install app/2.0 --prefix /var/www/app
+gpm install app/2.0.0 --prefix /var/www/app
 ```
 
 ### 12.4. `download`
