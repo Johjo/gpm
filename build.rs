@@ -12,5 +12,8 @@ fn repository_version() -> Result<String, git2::Error> {
 }
 
 fn main() {
+    let repo = Repository::discover(env!("CARGO_MANIFEST_DIR")).unwrap();
+
+    println!("cargo:rerun-if-changed=.git/{}", repo.head().unwrap().name().unwrap());
     println!("cargo:rustc-env=GIT_DESCRIBE={}", repository_version().unwrap());
 }
