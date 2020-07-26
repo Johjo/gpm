@@ -1,21 +1,13 @@
-use git2::{Repository, DescribeOptions};
 
-fn repository_version(repo: Repository) -> Result<String, git2::Error> {
-    let mut options = DescribeOptions::new();
+extern crate vergen;
 
-    options.describe_tags().show_commit_oid_as_fallback(true);
-    
-    let descr = repo.describe(&options)?;
-    
-    Ok(descr.format(None)?)
-}
+use vergen::{ConstantsFlags, generate_cargo_keys};
 
 fn main() {
-    let repo = Repository::discover(env!("CARGO_MANIFEST_DIR")).unwrap();
-    let head_ref_path = repo.head().unwrap().name().unwrap().to_owned();
-    let version = repository_version(repo).unwrap();
+    // Setup the flags, toggling off the 'SEMVER_FROM_CARGO_PKG' flag
+    let mut flags = ConstantsFlags::all();
+    flags.toggle(ConstantsFlags::SEMVER_FROM_CARGO_PKG);
 
-    println!("cargo:rerun-if-changed=.git/HEAD");
-    println!("cargo:rerun-if-changed=.git/{}", head_ref_path);
-    println!("cargo:rustc-env=GIT_DESCRIBE={}", version);
+    // Generate the 'cargo:' key output
+    generate_cargo_keys(ConstantsFlags::all()).expect("Unable to generate the cargo keys!");
 }

@@ -29,7 +29,7 @@ fn main() {
 
     let matches = App::new("gpm")
         .about("Git-based package manager.")
-        .version(env!("GIT_DESCRIBE"))
+        .version(env!("VERGEN_SEMVER"))
         .setting(clap::AppSettings::ArgRequiredElseHelp)
         .subcommand(clap::SubCommand::with_name("install")
             .about("Install a package")
