@@ -121,7 +121,7 @@ pub fn find_ssh_key_for_host(host : &String) -> Option<path::PathBuf> {
 
 fn read_utf8(c: &mut Cursor::<&[u8]>) -> io::Result<String> {
     let mut buf = read_string(c)?;
-    // Make data be zeroed even an error occurred
+    // Make data be zeroed even if an error occurred
     // So we cannot directly use `String::from_utf8()`
     match std::str::from_utf8(&buf) {
         Ok(_) => unsafe {
@@ -158,24 +158,36 @@ fn read_uint32(c: &mut Cursor::<&[u8]>) -> io::Result<u32> {
 }
 
 pub fn ssh_key_requires_passphrase(
-    buf : &mut dyn io::BufRead
+    buf: &mut dyn io::BufRead
 ) -> io::Result<bool> {
-    debug!("attempting to detect SSH private key encryption");
-    let mut content = vec![];
-    for line in buf.lines() {
-        if let Ok(line) = line {
-            if line.contains("ENCRYPTED") {
-                debug!("found ENCRYPTED keyword");
-                return Ok(true);
-            } else if !line.starts_with('-') {
-                content.push(line.clone());
-            }
-        }
+    debug!("attempting to detect SSH private key encryption (OpenSSH <= 6.4)");
+    let metadata_regex = regex::Regex::new(r"(.*): (.*)")
+        .unwrap();
+    let (metadata, content) : (Vec<String>, Vec<String>) = buf.lines()
+        // Remove comments
+        .filter(|line| !line.as_ref().unwrap().starts_with('-'))
+        .collect::<io::Result<Vec<String>>>()?
+        .iter()
+        .map(String::clone)
+        .partition(|line| metadata_regex.is_match(line));
+
+    if metadata.iter().any(|l| l.contains("ENCRYPTED")) {
+        debug!("found ENCRYPTED keyword");
+        return Ok(true);
     }
 
-    debug!("attempting to decode SSH private key");
-    let content = decode(content.concat());
-    if let Ok(keydata) = content {
+    debug!("attempting to decode SSH private key (OpenSSH >= 6.5)");
+    // The following code is loosely inspired from the rust-osshkeys crate
+    // (https://crates.io/crates/osshkeys) to make a basic check of the SSH
+    // private key header and read the cipher name:
+    //
+    // https://github.com/Leo1003/rust-osshkeys/blob/ed38963db967239de05af3473fe4000917a2c2c8/src/format/ossh_privkey.rs#L23
+    //
+    // The read_uint32(), read_string() and read_utf8() above also come from
+    // the same project:
+    //
+    // https://github.com/Leo1003/rust-osshkeys/blob/ed38963db967239de05af3473fe4000917a2c2c8/src/sshbuf.rs#L167
+    if let Ok(keydata) = decode(content.concat()) {
         if keydata.len() >= 16 && &keydata[0..15] == KEY_MAGIC {
             let mut reader = Cursor::new(keydata.deref());
             reader.set_position(15);
