@@ -38,4 +38,5 @@ termimad = "0.8.17"
 crossterm = "0.16.0"
 
 [build-dependencies]
-vergen = "3.1.0"
+vergen = "5.1.8"
+anyhow = "1.0.40"
