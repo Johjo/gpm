@@ -290,7 +290,7 @@ version = "0.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "286e0b41c3a20da26536c6000a280585d519fd07b3956b43aed8a79e9edce980"
 dependencies = [
- "core-foundation-sys 0.5.1",
+ "core-foundation-sys",
  "libc",
 ]
 
@@ -302,12 +302,6 @@ checksum = "716c271e8613ace48344f723b60b900a93150271e5be206212d052bbc0883efa"
 dependencies = [
  "libc",
 ]
-
-[[package]]
-name = "core-foundation-sys"
-version = "0.8.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ea221b5284a47e40033bf9b66f35f984ec0ea2931eb03505246cd27a963f981b"
 
 [[package]]
 name = "crc32fast"
@@ -456,12 +450,6 @@ dependencies = [
  "redox_users",
  "winapi 0.3.8",
 ]
-
-[[package]]
-name = "doc-comment"
-version = "0.3.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fea41bba32d969b513997752735605054bc0dfa92b4c56bf1189f2e174be7a10"
 
 [[package]]
 name = "dotenv"
@@ -762,7 +750,7 @@ dependencies = [
  "pretty_env_logger",
  "regex",
  "rpassword",
- "semver 0.9.0",
+ "semver",
  "tar",
  "tempfile",
  "termimad",
@@ -1184,15 +1172,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "ntapi"
-version = "0.3.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7a31937dea023539c72ddae0e3571deadc1414b300483fa7aaec176168cfa9d2"
-dependencies = [
- "winapi 0.3.8",
-]
-
-[[package]]
 name = "num-integer"
 version = "0.1.43"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1226,12 +1205,6 @@ name = "number_prefix"
 version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "17b02fc0ff9a9e4b35b3342880f48e896ebf69f2967921fe8646bf5b7125956a"
-
-[[package]]
-name = "once_cell"
-version = "1.7.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "af8b08b04175473088b46763e51ee54da5f9a164bc162f615b91bc179dbf15a3"
 
 [[package]]
 name = "openssl"
@@ -1666,15 +1639,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bcfe5b13211b4d78e5c2cadfebd7769197d95c639c35a50057eb4c05de811395"
 
 [[package]]
-name = "rustc_version"
-version = "0.3.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f0dfe2087c51c460008730de8b57e6a320782fbfb312e1f4d520e6c6fae155ee"
-dependencies = [
- "semver 0.11.0",
-]
-
-[[package]]
 name = "rustversion"
 version = "1.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1720,7 +1684,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bfab8dda0e7a327c696d893df9ffa19cadc4bd195797997f5223cf5831beaf05"
 dependencies = [
  "core-foundation",
- "core-foundation-sys 0.5.1",
+ "core-foundation-sys",
  "libc",
  "security-framework-sys",
 ]
@@ -1732,7 +1696,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3d6696852716b589dff9e886ff83778bb635150168e83afa8ac6b8a78cb82abc"
 dependencies = [
  "MacTypes-sys",
- "core-foundation-sys 0.5.1",
+ "core-foundation-sys",
  "libc",
 ]
 
@@ -1742,16 +1706,7 @@ version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1d7eb9ef2c18661902cc47e535f9bc51b78acd254da71d375c2f6720d9a40403"
 dependencies = [
- "semver-parser 0.7.0",
-]
-
-[[package]]
-name = "semver"
-version = "0.11.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f301af10236f6df4160f7c3f04eec6dbc70ace82d23326abad5edee88801c6b6"
-dependencies = [
- "semver-parser 0.10.2",
+ "semver-parser",
 ]
 
 [[package]]
@@ -1759,15 +1714,6 @@ name = "semver-parser"
 version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "388a1df253eca08550bef6c72392cfe7c30914bf41df5269b68cbd6ff8f570a3"
-
-[[package]]
-name = "semver-parser"
-version = "0.10.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "00b0bef5b7f9e0df16536d3961cfb6e84331c065b4066afb39768d0e319411f7"
-dependencies = [
- "pest",
-]
 
 [[package]]
 name = "serde"
@@ -1922,21 +1868,6 @@ dependencies = [
  "quote 1.0.2",
  "syn 1.0.13",
  "unicode-xid 0.2.0",
-]
-
-[[package]]
-name = "sysinfo"
-version = "0.16.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a474f92030c61f32a21f4b3370c6f25c710e55b2ea9e64dd9ed4f1cd5e734d9b"
-dependencies = [
- "cfg-if 1.0.0",
- "core-foundation-sys 0.8.2",
- "doc-comment",
- "libc",
- "ntapi",
- "once_cell",
- "winapi 0.3.8",
 ]
 
 [[package]]
@@ -2203,10 +2134,7 @@ dependencies = [
  "chrono",
  "enum-iterator",
  "getset",
- "git2",
- "rustc_version",
  "rustversion",
- "sysinfo",
  "thiserror",
 ]
 
