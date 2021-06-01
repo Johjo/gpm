@@ -2,12 +2,21 @@ use std::env;
 use std::path;
 use std::io;
 use std::fs;
-
+use std::ops::Deref;
 use std::io::prelude::*;
+use std::io::{Cursor, Read};
 
 use pest::Parser;
 
+extern crate base64;
+
+use base64::{decode};
+
+use zeroize::{Zeroize, Zeroizing};
+
 use crate::gpm::command;
+
+const KEY_MAGIC: &[u8] = b"openssh-key-v1\0";
 
 #[derive(Parser)]
 #[grammar = "gpm/ssh_config.pest"]
@@ -110,14 +119,76 @@ pub fn find_ssh_key_for_host(host : &String) -> Option<path::PathBuf> {
     }
 }
 
-pub fn ssh_key_requires_passphrase(buf : &mut dyn io::BufRead) -> bool {
+fn read_utf8(c: &mut Cursor::<&[u8]>) -> io::Result<String> {
+    let mut buf = read_string(c)?;
+    // Make data be zeroed even an error occurred
+    // So we cannot directly use `String::from_utf8()`
+    match std::str::from_utf8(&buf) {
+        Ok(_) => unsafe {
+            // We have checked the string using `str::from_utf8()`
+            // To avoid memory copy, just use `from_utf8_unchecked()`
+            Ok(String::from_utf8_unchecked(buf))
+        },
+        Err(_) => {
+            buf.zeroize();
+            Err(io::Error::new(
+                io::ErrorKind::InvalidData,
+                "Invalid UTF-8 sequence",
+            ))
+        }
+    }
+}
+
+fn read_string(c: &mut Cursor::<&[u8]>) -> io::Result<Vec<u8>> {
+    let len = read_uint32(c)? as usize;
+    let mut buf = vec![0u8; len];
+    match c.read_exact(buf.as_mut_slice()) {
+        Ok(_) => Ok(buf),
+        Err(e) => {
+            buf.zeroize();
+            Err(e)
+        }
+    }
+}
+
+fn read_uint32(c: &mut Cursor::<&[u8]>) -> io::Result<u32> {
+    let mut buf = Zeroizing::new([0u8; 4]);
+    c.read_exact(&mut *buf)?;
+    Ok(u32::from_be_bytes(*buf))
+}
+
+pub fn ssh_key_requires_passphrase(
+    buf : &mut dyn io::BufRead
+) -> io::Result<bool> {
+    debug!("attempting to detect SSH private key encryption");
+    let mut content = vec![];
     for line in buf.lines() {
-        if line.unwrap().contains("ENCRYPTED") {
-            return true;
+        if let Ok(line) = line {
+            if line.contains("ENCRYPTED") {
+                debug!("found ENCRYPTED keyword");
+                return Ok(true);
+            } else if !line.starts_with('-') {
+                content.push(line.clone());
+            }
         }
     }
 
-    return false;
+    debug!("attempting to decode SSH private key");
+    let content = decode(content.concat());
+    if let Ok(keydata) = content {
+        if keydata.len() >= 16 && &keydata[0..15] == KEY_MAGIC {
+            let mut reader = Cursor::new(keydata.deref());
+            reader.set_position(15);
+    
+            let ciphername = read_utf8(&mut reader)?;
+
+            debug!("found cipher {}", ciphername);
+
+            return Ok(ciphername != "none");
+        }
+    }
+
+    return Ok(false);
 }
 
 pub fn get_ssh_key_and_passphrase(host : &String) -> (Option<path::PathBuf>, Option<String>) {
@@ -171,7 +242,7 @@ pub fn get_ssh_key_and_passphrase(host : &String) -> (Option<path::PathBuf>, Opt
 
 pub fn get_ssh_passphrase(buf : &mut dyn io::BufRead, passphrase_prompt : String) -> Option<String> {
     match ssh_key_requires_passphrase(buf) {
-        true => match env::var("GPM_SSH_PASS") {
+        Ok(true) => match env::var("GPM_SSH_PASS") {
             Ok(p) => Some(p),
             Err(_) => {
                 trace!("prompt for passphrase");
@@ -183,6 +254,11 @@ pub fn get_ssh_passphrase(buf : &mut dyn io::BufRead, passphrase_prompt : String
                 Some(pass_string)
             }
         },
-        false => None,
+        Ok(false) => None,
+        Err(e) => {
+            error!("Unable to read SSH private key: {}", e);
+
+            None
+        },
     }
 }
