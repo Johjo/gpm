@@ -32,22 +32,23 @@ pub fn get_git_credentials_callback(
             debug!("using username and password from URI");
             git2::Cred::userpass_plaintext(url.username(), url.password().unwrap())
         } else {
+            debug!("using SSH key");
             let host = String::from(url.host_str().unwrap());
-        debug!("using SSH key");
-        let (key, passphrase) = gpm::ssh::get_ssh_key_and_passphrase(&host);
-        let (has_pass, passphrase) = match passphrase {
-            Some(p) => (true, p),
-            None => (false, String::new()),
-        };
+            let (key, passphrase) = gpm::ssh::get_ssh_key_and_passphrase(&host);
+            let (has_pass, passphrase) = match passphrase {
+                Some(p) => (true, p),
+                None => (false, String::new()),
+            };
 
-        match key {
+            match key {
                 Some(k) => git2::Cred::ssh_key(
                     username,
                     None,
                     &k,
                     if has_pass { Some(passphrase.as_str()) } else { None }
                 ),
-            None => git2::Cred::default(),
+                None => git2::Cred::default(),
+            }
         }
     }
 }
