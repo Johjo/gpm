@@ -56,7 +56,6 @@ pub fn get_git_credentials_callback(
         }
     }
 }
-}
 
 pub fn pull_repo(repo : &git2::Repository) -> Result<(), git2::Error> {
     info!("fetching changes for repository {}", repo.workdir().unwrap().display());
